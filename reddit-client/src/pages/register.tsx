@@ -1,6 +1,6 @@
 import React from 'react'
 import { Formik, Form } from 'formik';
-import { FormControl, FormLabel, Input, Button, Box } from '@chakra-ui/core';
+import { Button, Box } from '@chakra-ui/core';
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
 interface RegisterProps {
