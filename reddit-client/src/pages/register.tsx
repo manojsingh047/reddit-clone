@@ -1,32 +1,61 @@
 import React from 'react'
-import {Formik, Form} from 'formik';
-import { FormControl, FormLabel, Input } from '@chakra-ui/core';
+import { Formik, Form } from 'formik';
+import { FormControl, FormLabel, Input, Button, Box } from '@chakra-ui/core';
+import Wrapper from '../components/Wrapper';
+import InputField from '../components/InputField';
 interface RegisterProps {
 }
 
 export const Register: React.FC<RegisterProps> = () => {
-    return (
+  return (
+    <Wrapper variant="small">
       <Formik
         initialValues={{
-          userName:'',
-          password:'',
-          firstName:'',
-          lastName:''
+          userName: '',
+          password: '',
+          firstName: '',
+          lastName: ''
         }}
         onSubmit={
           (values) => console.log(values)
         }
       >
-        {({values}) => (
+        {({ isSubmitting }) => (
           <Form>
-<FormControl>
-                <FormLabel htmlFor="username">Username</FormLabel>
-                <Input id="username" placeholder="username" />
-                {/* <FormErrorMessage>{form.errors.name}</FormErrorMessage> */}
-              </FormControl>
+            <InputField
+              name="firstName"
+              placeholder="firstName"
+              label="First Name"
+            />
+            <Box mt={4}>
+              <InputField
+                name="lastName"
+                placeholder="lastName"
+                label="Last Name"
+              />
+            </Box>
+            <Box mt={4}>
+              <InputField
+                name="userName"
+                placeholder="userName"
+                label="Username"
+              />
+            </Box>
+            <Box mt={4}>
+              <InputField
+                name="password"
+                placeholder="password"
+                type="password"
+                label="Password"
+              />
+            </Box>
+            <Button mt={4} type="submit" isLoading={isSubmitting} variantColor="red">
+              Register
+            </Button>
           </Form>
         )}
       </Formik>
-    );
+    </Wrapper>
+  );
 }
 export default Register;
