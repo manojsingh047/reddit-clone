@@ -10,3 +10,8 @@ Setup dev env:
 
 //mikriORM migration:
 npx mikro-orm migration:create
+
+
+2. Run redis
+manoj@MANOj:~$ sudo service redis-server status
+ * redis-server is running

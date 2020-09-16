@@ -25,6 +25,7 @@ const user_1 = require("./resolvers/user");
 const redis_1 = __importDefault(require("redis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
+const cors_1 = __importDefault(require("cors"));
 let RedisStore = connect_redis_1.default(express_session_1.default);
 let redisClient = redis_1.default.createClient();
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -34,6 +35,10 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     app.listen(constants_1.__serverPort__, () => {
         console.log("running server on 4000..");
     });
+    app.use(cors_1.default({
+        origin: 'http://localhost:3000',
+        credentials: true
+    }));
     app.use(express_session_1.default({
         store: new RedisStore({
             client: redisClient,
@@ -57,7 +62,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         }),
         context: ({ req, res }) => ({ em: orm.em, req, res }),
     });
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({ app, cors: false });
 });
 main().catch((err) => {
     console.error(err);

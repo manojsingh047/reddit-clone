@@ -3,10 +3,35 @@ import { Formik, Form } from 'formik';
 import { Button, Box, Heading } from '@chakra-ui/core';
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
+import { useMutation, useQuery } from 'urql';
 interface RegisterProps {
 }
+const MUT_REGISTER = `mutation Register($options: UserRegisterInput!) {
+  register (options:$options) {
+    errors {
+      field
+      message
+    }
+    user{
+      id
+      userName
+      firstName
+    }
+  }
+}`;
 
 export const Register: React.FC<RegisterProps> = () => {
+  const [, register] = useMutation(MUT_REGISTER);
+
+  const [] = useQuery({
+    query: `query{
+      me{
+        id
+        userName
+      }
+    }`
+  });
+
   return (
     <Wrapper variant="small">
       <Heading mb={10} textAlign="center">Sign Up</Heading>
@@ -17,9 +42,19 @@ export const Register: React.FC<RegisterProps> = () => {
           firstName: '',
           lastName: ''
         }}
-        onSubmit={
-          (values) => console.log(values)
-        }
+        onSubmit={(values) => {
+          console.log(values);
+          return register({
+            options: {
+              loginInput: {
+                userName: values.userName,
+                password: values.password
+              },
+              firstName: values.firstName,
+              lastName: values.lastName
+            }
+          });
+        }}
       >
         {({ isSubmitting }) => (
           <Form>
