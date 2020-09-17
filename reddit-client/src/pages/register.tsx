@@ -4,33 +4,18 @@ import { Button, Box, Heading } from '@chakra-ui/core';
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
 import { useMutation, useQuery } from 'urql';
+import { useMeQuery, useRegisterMutation } from '../generated/graphql';
+import { log } from 'console';
+import { toErrorMap } from '../utils';
 interface RegisterProps {
 }
-const MUT_REGISTER = `mutation Register($options: UserRegisterInput!) {
-  register (options:$options) {
-    errors {
-      field
-      message
-    }
-    user{
-      id
-      userName
-      firstName
-    }
-  }
-}`;
+
 
 export const Register: React.FC<RegisterProps> = () => {
-  const [, register] = useMutation(MUT_REGISTER);
+  const [, register] = useRegisterMutation();
 
-  const [] = useQuery({
-    query: `query{
-      me{
-        id
-        userName
-      }
-    }`
-  });
+  //todo - this is not needed
+  const [] = useMeQuery();
 
   return (
     <Wrapper variant="small">
@@ -42,9 +27,9 @@ export const Register: React.FC<RegisterProps> = () => {
           firstName: '',
           lastName: ''
         }}
-        onSubmit={(values) => {
+        onSubmit={async (values, { setErrors }) => {
           console.log(values);
-          return register({
+          const response = await register({
             options: {
               loginInput: {
                 userName: values.userName,
@@ -54,6 +39,12 @@ export const Register: React.FC<RegisterProps> = () => {
               lastName: values.lastName
             }
           });
+          if (!!response.data?.register.errors) {
+            setErrors(toErrorMap(response.data.register.errors));
+          } else if (!!response.data?.register.user) {
+            console.log(response);
+
+          }
         }}
       >
         {({ isSubmitting }) => (

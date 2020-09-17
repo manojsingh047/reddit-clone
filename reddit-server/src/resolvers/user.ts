@@ -71,7 +71,7 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
+            field: "userName",
             message: "provide username with atleast 3 characters",
           },
         ],
@@ -105,8 +105,8 @@ export class UserResolver {
         return {
           errors: [
             {
-              field: "username",
-              message: "username already taken",
+              field: "userName",
+              message: "userName already taken",
             },
           ],
         };
@@ -115,7 +115,7 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
+            field: "userName",
             message: error.detail || "something went wrong",
           },
         ],
@@ -144,7 +144,7 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
+            field: "userName",
             message: "invalid username",
           },
         ],
