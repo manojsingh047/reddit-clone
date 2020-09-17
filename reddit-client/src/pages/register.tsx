@@ -1,6 +1,7 @@
 import React from 'react'
 import { Formik, Form } from 'formik';
 import { Button, Box, Heading } from '@chakra-ui/core';
+import { useRouter } from 'next/router';
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
 import { useMutation, useQuery } from 'urql';
@@ -13,7 +14,7 @@ interface RegisterProps {
 
 export const Register: React.FC<RegisterProps> = () => {
   const [, register] = useRegisterMutation();
-
+  const router = useRouter();
   //todo - this is not needed
   const [] = useMeQuery();
 
@@ -43,7 +44,7 @@ export const Register: React.FC<RegisterProps> = () => {
             setErrors(toErrorMap(response.data.register.errors));
           } else if (!!response.data?.register.user) {
             console.log(response);
-
+            router.push('/');
           }
         }}
       >
