@@ -98,7 +98,7 @@ export class UserResolver {
     // });
     let user;
     try {
-      await em.persistAndFlush(user); //thowing unknown error - ValidationError: You cannot call em.flush() from inside lifecycle hook handlers
+      // await em.persistAndFlush(user); //thowing unknown error - ValidationError: You cannot call em.flush() from inside lifecycle hook handlers
 
       const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
         user_name: options.loginInput.userName,
@@ -108,8 +108,8 @@ export class UserResolver {
         created_at: new Date(), //need to provide all columns vals since we are doing a insert manually
         updated_at: new Date(), //need to provide all columns vals since we are doing a insert manually
       }).returning('*');
-      user = result[0];
-
+      const mappedToEntitiesResults = result.map((item: User) => em.map(User, item));
+      user = mappedToEntitiesResults[0];
     } catch (error) {
       if (
         error.name === "UniqueConstraintViolationException" ||
@@ -139,7 +139,6 @@ export class UserResolver {
     //store user id in session
     //this will keep the user logged in
     req.session.userId = user.id;
-
     return {
       user,
     };
