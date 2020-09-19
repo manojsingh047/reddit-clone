@@ -101,6 +101,7 @@ export class UserResolver {
       // await em.persistAndFlush(user); //thowing unknown error - ValidationError: You cannot call em.flush() from inside lifecycle hook handlers
 
       const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
+        //need to provide actual column names that are in DB and need to provide all columns, since this is a raw query and we don't have ORM types and validations availe, and similarly we need to map the result that we get to our types bcecause that would be a raw result from DB 
         user_name: options.loginInput.userName,
         password: hashedPassword,
         first_name: options.firstName,
@@ -108,7 +109,7 @@ export class UserResolver {
         created_at: new Date(), //need to provide all columns vals since we are doing a insert manually
         updated_at: new Date(), //need to provide all columns vals since we are doing a insert manually
       }).returning('*');
-      const mappedToEntitiesResults = result.map((item: User) => em.map(User, item));
+      const mappedToEntitiesResults = result.map((item: User) => em.map(User, item)); //mapped raw result from DB to ORM type 
       user = mappedToEntitiesResults[0];
     } catch (error) {
       if (
