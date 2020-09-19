@@ -11,6 +11,7 @@ import {
 import { MyContext } from "src/types";
 import argon2 from "argon2";
 import { User } from "./../entities/User";
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
 class LoginInput {
@@ -89,14 +90,26 @@ export class UserResolver {
     }
     const hashedPassword = await argon2.hash(options.loginInput.password);
 
-    const user = em.create(User, {
-      userName: options.loginInput.userName,
-      password: hashedPassword,
-      firstName: options.firstName,
-      lastName: options.lastName,
-    });
+    // const user = em.create(User, {
+    //   userName: options.loginInput.userName,
+    //   password: hashedPassword,
+    //   firstName: options.firstName,
+    //   lastName: options.lastName,
+    // });
+    let user;
     try {
-      await em.persistAndFlush(user);
+      await em.persistAndFlush(user); //thowing unknown error - ValidationError: You cannot call em.flush() from inside lifecycle hook handlers
+
+      const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
+        user_name: options.loginInput.userName,
+        password: hashedPassword,
+        first_name: options.firstName,
+        last_name: options.lastName,
+        created_at: new Date(), //need to provide all columns vals since we are doing a insert manually
+        updated_at: new Date(), //need to provide all columns vals since we are doing a insert manually
+      }).returning('*');
+      user = result[0];
+
     } catch (error) {
       if (
         error.name === "UniqueConstraintViolationException" ||
