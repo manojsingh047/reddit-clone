@@ -18,7 +18,7 @@ let redisClient = redis.createClient();
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
-  await orm.getMigrator().up();
+  await orm.getMigrator().up(); //runs migrations
 
   const app = express();
   app.listen(__serverPort__, () => {

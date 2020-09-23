@@ -13,3 +13,7 @@ Run these commands in WSL
 > sudo service redis-server stop
   - To run redis cli
   > redis-cli 
+
+win7:
+Run redis-server.exe
+Run redis-cli.exe
