@@ -18,12 +18,13 @@ let redisClient = redis.createClient();
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
-  await orm.getMigrator().up(); //runs migrations
+  await orm.getMigrator().up();
 
   const app = express();
   app.listen(__serverPort__, () => {
     console.log("running server on 4000..");
   });
+
   app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
