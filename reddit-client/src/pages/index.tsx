@@ -1,6 +1,10 @@
+import { Navbar } from "../components/Navbar";
 
 const Index = () => (
-  <>hello nextjs world</>
+  <>
+    <Navbar />
+  hello nextjs world
+  </>
 )
 
 export default Index
