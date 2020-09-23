@@ -4,17 +4,14 @@ import { Button, Box, Heading } from '@chakra-ui/core';
 import { useRouter } from 'next/router';
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
-import { useMutation, useQuery } from 'urql';
-import { useMeQuery, useRegisterMutation } from '../generated/graphql';
-import { log } from 'console';
+import { useLoginMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils';
 interface LoginProps {
 }
 
-
 export const Login: React.FC<LoginProps> = () => {
-  // const [, register] = useRegisterMutation();
-  // const router = useRouter();
+  const [, login] = useLoginMutation();
+  const router = useRouter();
 
   return (
     <Wrapper variant="small">
@@ -23,27 +20,21 @@ export const Login: React.FC<LoginProps> = () => {
         initialValues={{
           userName: '',
           password: '',
-          firstName: '',
-          lastName: ''
         }}
         onSubmit={async (values, { setErrors }) => {
           console.log(values);
-          // const response = await register({
-          //   options: {
-          //     loginInput: {
-          //       userName: values.userName,
-          //       password: values.password
-          //     },
-          //     firstName: values.firstName,
-          //     lastName: values.lastName
-          //   }
-          // });
-          // if (!!response.data?.register.errors) {
-          //   setErrors(toErrorMap(response.data.register.errors));
-          // } else if (!!response.data?.register.user) {
-          //   console.log(response);
-          //   router.push('/');
-          // }
+          const response = await login({
+            options: {
+              userName: values.userName,
+              password: values.password
+            }
+          });
+          if (!!response.data?.login.errors) {
+            setErrors(toErrorMap(response.data.login.errors));
+          } else if (!!response.data?.login.user) {
+            console.log(response);
+            router.push('/');
+          }
         }}
       >
         {({ isSubmitting }) => (
