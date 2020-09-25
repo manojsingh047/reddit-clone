@@ -32,7 +32,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const orm = yield core_1.MikroORM.init(mikro_orm_config_1.default);
     yield orm.getMigrator().up();
     const app = express_1.default();
-    app.listen(constants_1.__serverPort__, () => {
+    app.listen(constants_1.SERVER_PORT, () => {
         console.log("running server on 4000..");
     });
     app.use(cors_1.default({
@@ -50,7 +50,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             secure: constants_1.__prod__,
             sameSite: "lax",
         },
-        name: "sessionId",
+        name: constants_1.COOKIE_NAME,
         secret: "password",
         resave: false,
         saveUninitialized: false,

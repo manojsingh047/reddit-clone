@@ -1,10 +1,10 @@
 import { Box, Flex, Link } from '@chakra-ui/core';
 import React from 'react'
-import { useMeQuery } from '../generated/graphql'
+import { useLogoutMutation, useMeQuery } from '../generated/graphql'
 import NextLink from 'next/link'
-
 export const Navbar = () => {
     const [{ fetching, data }] = useMeQuery();
+    const [, logout] = useLogoutMutation();
     let renderEle;
     if (!data?.me) {
         //logged out
@@ -22,9 +22,7 @@ export const Navbar = () => {
         renderEle = (
             <>
                 <Link mr={2}>{data?.me?.userName}</Link>
-                <NextLink href="/login">
-                    <Link>Logout</Link>
-                </NextLink>
+                <Link onClick={() => logout()}>Logout</Link>
             </>
         )
     }

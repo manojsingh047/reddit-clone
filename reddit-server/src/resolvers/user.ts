@@ -12,6 +12,7 @@ import { MyContext } from "src/types";
 import argon2 from "argon2";
 import { User } from "./../entities/User";
 import { EntityManager } from "@mikro-orm/postgresql";
+import { COOKIE_NAME } from "./../constants";
 
 @InputType()
 class LoginInput {
@@ -179,9 +180,24 @@ export class UserResolver {
     //store user id in session
     //this will keep the user logged in
     req.session.userId = user.id;
-
     return {
       user,
     };
+  }
+  @Mutation(() => Boolean)
+  async logout(
+    @Ctx() { req, res }: MyContext
+  ) {
+    return new Promise((resolve) => (
+      req.session.destroy((err) => {
+        res.clearCookie(COOKIE_NAME);
+        if (err) {
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      })
+    ));
+
   }
 }

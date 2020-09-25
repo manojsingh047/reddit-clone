@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
-import { __serverPort__, __prod__ } from "./constants";
+import { COOKIE_NAME, SERVER_PORT, __prod__ } from "./constants";
 import mikroConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -21,7 +21,7 @@ const main = async () => {
   await orm.getMigrator().up();
 
   const app = express();
-  app.listen(__serverPort__, () => {
+  app.listen(SERVER_PORT, () => {
     console.log("running server on 4000..");
   });
 
@@ -42,8 +42,8 @@ const main = async () => {
         secure: __prod__, //cookie works only on https
         sameSite: "lax", //csrf
       },
-      name: "sessionId",
-      secret: "password",
+      name: COOKIE_NAME,
+      secret: "password", //some password
       resave: false,
       saveUninitialized: false,
     })
