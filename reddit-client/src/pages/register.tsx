@@ -7,7 +7,7 @@ import InputField from '../components/InputField';
 import { useMutation, useQuery } from 'urql';
 import { useMeQuery, useRegisterMutation } from '../generated/graphql';
 import { log } from 'console';
-import { toErrorMap } from '../utils';
+import { toErrorMap } from '../utils/utils';
 interface RegisterProps {
 }
 

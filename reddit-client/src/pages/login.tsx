@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
 import { useLoginMutation } from '../generated/graphql';
-import { toErrorMap } from '../utils';
+import { toErrorMap } from '../utils/utils';
 interface LoginProps {
 }
 
