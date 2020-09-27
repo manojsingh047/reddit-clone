@@ -13,41 +13,24 @@ import argon2 from "argon2";
 import { User } from "./../entities/User";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { COOKIE_NAME } from "./../constants";
+import { UserRegisterInput } from "./UserRegisterInput";
+import { validateRegister } from "./../utils/validateRegister";
+import { FieldError } from "./FieldError";
 
 @InputType()
 class LoginInput {
   @Field()
-  userName: string;
+  userNameOrEmail: string;
 
   @Field()
   password: string;
 }
 
-@InputType()
-class UserRegisterInput {
-  @Field()
-  loginInput: LoginInput;
-
-  @Field()
-  firstName: string;
-
-  @Field({ nullable: true })
-  lastName?: string;
-}
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-
-  @Field()
-  message: string;
-}
-
 @ObjectType()
 class UserResponse {
   @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
 
+  errors?: FieldError[];
   @Field(() => User, { nullable: true })
   user?: User;
 }
@@ -69,27 +52,12 @@ export class UserResolver {
     @Arg("options") options: UserRegisterInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    if (options.loginInput.userName.length <= 2) {
-      return {
-        errors: [
-          {
-            field: "userName",
-            message: "provide username with atleast 3 characters",
-          },
-        ],
-      };
+    const errors = validateRegister(options);
+    if (errors) {
+      return { errors };
     }
-    if (options.loginInput.password.length <= 2) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "provide password with atleast 3 characters",
-          },
-        ],
-      };
-    }
-    const hashedPassword = await argon2.hash(options.loginInput.password);
+
+    const hashedPassword = await argon2.hash(options.password);
 
     // const user = em.create(User, {
     //   userName: options.loginInput.userName,
@@ -103,7 +71,8 @@ export class UserResolver {
 
       const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
         //need to provide actual column names that are in DB and need to provide all columns, since this is a raw query and we don't have ORM types and validations availe, and similarly we need to map the result that we get to our types bcecause that would be a raw result from DB 
-        user_name: options.loginInput.userName,
+        user_name: options.userName,
+        email: options.email,
         password: hashedPassword,
         first_name: options.firstName,
         last_name: options.lastName,
@@ -152,14 +121,14 @@ export class UserResolver {
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, {
-      userName: options.userName,
+      [options.userNameOrEmail.includes("@") ? "email" : "userName"]: options.userNameOrEmail,
     });
     if (!user) {
       return {
         errors: [
           {
-            field: "userName",
-            message: "invalid username",
+            field: "userNameOrEmail",
+            message: "invalid userNameOrEmail",
           },
         ],
       };
