@@ -38,6 +38,7 @@ export type User = {
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   userName: Scalars['String'];
+  email: Scalars['String'];
   firstName: Scalars['String'];
   lastName?: Maybe<Scalars['String']>;
 };
@@ -91,13 +92,15 @@ export type FieldError = {
 };
 
 export type UserRegisterInput = {
-  loginInput: LoginInput;
+  userName: Scalars['String'];
+  email: Scalars['String'];
+  password: Scalars['String'];
   firstName: Scalars['String'];
   lastName?: Maybe<Scalars['String']>;
 };
 
 export type LoginInput = {
-  userName: Scalars['String'];
+  userNameOrEmail: Scalars['String'];
   password: Scalars['String'];
 };
 

@@ -26,6 +26,7 @@ export const Register: React.FC<RegisterProps> = () => {
       <Formik
         initialValues={{
           userName: '',
+          email: '',
           password: '',
           firstName: '',
           lastName: ''
@@ -34,10 +35,9 @@ export const Register: React.FC<RegisterProps> = () => {
           console.log(values);
           const response = await register({
             options: {
-              loginInput: {
-                userName: values.userName,
-                password: values.password
-              },
+              userName: values.userName,
+              email: values.email,
+              password: values.password,
               firstName: values.firstName,
               lastName: values.lastName
             }
@@ -69,6 +69,13 @@ export const Register: React.FC<RegisterProps> = () => {
                 name="userName"
                 placeholder="userName"
                 label="Username"
+              />
+            </Box>
+            <Box mt={4}>
+              <InputField
+                name="email"
+                placeholder="email"
+                label="Email"
               />
             </Box>
             <Box mt={4}>

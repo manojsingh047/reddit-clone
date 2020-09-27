@@ -20,14 +20,14 @@ const Login: React.FC<LoginProps> = () => {
       <Heading mb={10} textAlign="center">Login</Heading>
       <Formik
         initialValues={{
-          userName: '',
+          userNameOrEmail: '',
           password: '',
         }}
         onSubmit={async (values, { setErrors }) => {
           console.log(values);
           const response = await login({
             options: {
-              userName: values.userName,
+              userNameOrEmail: values.userNameOrEmail,
               password: values.password
             }
           });
@@ -43,9 +43,9 @@ const Login: React.FC<LoginProps> = () => {
           <Form>
             <Box mt={4}>
               <InputField
-                name="userName"
-                placeholder="userName"
-                label="Username"
+                name="userNameOrEmail"
+                placeholder="userNameOrEmail"
+                label="Username Or Email"
               />
             </Box>
             <Box mt={4}>
