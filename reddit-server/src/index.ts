@@ -4,7 +4,7 @@ import connectRedis from "connect-redis";
 import cors from 'cors';
 import express from "express";
 import session from "express-session";
-import redis from "redis";
+const Redis = require("ioredis");
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME, SERVER_PORT, __prod__ } from "./constants";
@@ -12,9 +12,8 @@ import mikroConfig from "./mikro-orm.config";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-
 let RedisStore = connectRedis(session);
-let redisClient = redis.createClient();
+let redisClient = new Redis();
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
