@@ -12,10 +12,12 @@ import { MyContext } from "src/types";
 import argon2 from "argon2";
 import { User } from "./../entities/User";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { COOKIE_NAME } from "./../constants";
+import { COOKIE_NAME, PASSWORD_RESET_KEY } from "./../constants";
 import { UserRegisterInput } from "./UserRegisterInput";
 import { validateRegister } from "./../utils/validateRegister";
 import { FieldError } from "./FieldError";
+import { sendMail } from "../utils/sendMail";
+import { v4 as uuidv4 } from 'uuid';
 
 @InputType()
 class LoginInput {
@@ -168,5 +170,83 @@ export class UserResolver {
       })
     ));
 
+  }
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { em, redisClient }: MyContext
+  ) {
+    const user = await em.findOne(User, {
+      email: email
+    })
+
+    if (!user) {
+      return true;
+    }
+    const uuid = uuidv4();
+    await redisClient.set(uuid, user.id);
+    await sendMail(email, `
+      <h2>
+        <a href='http://localhost:3000/change-password/${uuid}' target='_blank'>Click this link to reset password</a>
+      </h2>
+    `);
+
+    return true;
+  }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("password") password: string,
+    @Arg("token") token: string,
+    @Ctx() { em, redisClient }: MyContext
+  ): Promise<UserResponse> {
+    const trimmedPassword = (password || "").trim();
+    if (trimmedPassword.length <= 2) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "provide password with atleast 3 characters",
+          }
+        ]
+      }
+    }
+
+    const userID = await redisClient.get(token);
+
+    if (!userID) {
+      return {
+        errors: [{
+          field: 'token',
+          message: 'invalid token'
+        }]
+      }
+    }
+
+    const user = await em.findOne(User, {
+      id: parseInt(userID)
+    })
+
+    console.log(user);
+
+
+    if (!user) {
+      return {
+        errors: [{
+          field: 'token',
+          message: 'weird issue, user not found'
+        }]
+      }
+    }
+
+    const hashedPass = await argon2.hash(trimmedPassword);
+
+    user.password = hashedPass;
+
+    await em.persistAndFlush(user);
+
+    return {
+      user
+    };
   }
 }

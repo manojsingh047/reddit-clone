@@ -13,7 +13,7 @@ exports.default = {
     password: "manoj1234",
     type: "postgresql",
     entities: [Post_1.Post, User_1.User],
-    debug: !constants_1.__prod__,
+    debug: !constants_1.IS_PROD,
     migrations: {
         path: path_1.default.join(__dirname, "./migrations"),
         pattern: /^[\w-]+\d+\.[tj]s$/,

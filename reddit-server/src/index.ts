@@ -7,7 +7,7 @@ import session from "express-session";
 const Redis = require("ioredis");
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
-import { COOKIE_NAME, SERVER_PORT, __prod__ } from "./constants";
+import { COOKIE_NAME, SERVER_PORT, IS_PROD } from "./constants";
 import mikroConfig from "./mikro-orm.config";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
@@ -38,7 +38,7 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //almost 10 years
         httpOnly: true, //coookie can't be accessed by frontend code
-        secure: __prod__, //cookie works only on https
+        secure: IS_PROD, //cookie works only on https
         sameSite: "lax", //csrf
       },
       name: COOKIE_NAME,
@@ -52,7 +52,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res }),
+    context: ({ req, res, }) => ({ em: orm.em, req, res, redisClient }),
   });
   apolloServer.applyMiddleware({ app, cors: false });
 };

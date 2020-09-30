@@ -47,7 +47,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
-            secure: constants_1.__prod__,
+            secure: constants_1.IS_PROD,
             sameSite: "lax",
         },
         name: constants_1.COOKIE_NAME,
@@ -60,7 +60,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],
             validate: false,
         }),
-        context: ({ req, res }) => ({ em: orm.em, req, res }),
+        context: ({ req, res, }) => ({ em: orm.em, req, res, redisClient }),
     });
     apolloServer.applyMiddleware({ app, cors: false });
 });
