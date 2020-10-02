@@ -39,14 +39,28 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  @Query(() => User, { nullable: true })
-  async me(@Ctx() { em, req }: MyContext): Promise<User | null> {
+  @Query(() => UserResponse)
+  async me(@Ctx() { em, req }: MyContext): Promise<UserResponse> {
     if (!req.session.userId) {
-      return null;
+      return {
+        errors: [{
+          field: 'me',
+          message: 'user not found'
+        }]
+      };
     }
     const currentUser = await em.findOne(User, { id: req.session.userId });
-
-    return currentUser;
+    if (!currentUser) {
+      return {
+        errors: [{
+          field: 'me',
+          message: 'user not found'
+        }]
+      };
+    }
+    return {
+      user: currentUser
+    };
   }
 
   @Mutation(() => UserResponse)
