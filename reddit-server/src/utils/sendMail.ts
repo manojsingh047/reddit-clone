@@ -6,14 +6,22 @@ export async function sendMail(to: string, text: string) {
 
     // let testAccount = await nodemailer.createTestAccount();
     // console.log(testAccount);
-
+    let testAccount = {
+        user: 'krcyywzoh5tbom7j@ethereal.email',
+        pass: 'tjH4UmFJSM31yW7ydt',
+        smtp: { host: 'smtp.ethereal.email', port: 587, secure: false },
+        imap: { host: 'imap.ethereal.email', port: 993, secure: true },
+        pop3: { host: 'pop3.ethereal.email', port: 995, secure: true },
+        web: 'https://ethereal.email'
+    }
+      
     let transporter = nodemailer.createTransport({
         host: "smtp.ethereal.email",
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: 'pjdykpmolj34xmfc@ethereal.email', // generated ethereal user
-            pass: 'Cdzr5dxdPvEHqa3B78', // generated ethereal password
+            user: testAccount.user, // generated ethereal user
+            pass: testAccount.pass, // generated ethereal password
         },
     });
 
