@@ -12,7 +12,7 @@ import { MyContext } from "src/types";
 import argon2 from "argon2";
 import { User } from "./../entities/User";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { COOKIE_NAME, PASSWORD_RESET_KEY } from "./../constants";
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "./../constants";
 import { UserRegisterInput } from "./UserRegisterInput";
 import { validateRegister } from "./../utils/validateRegister";
 import { FieldError } from "./FieldError";
@@ -198,7 +198,11 @@ export class UserResolver {
       return true;
     }
     const uuid = uuidv4();
-    await redisClient.set(uuid, user.id);
+    await redisClient.set(
+      FORGOT_PASSWORD_PREFIX + uuid,
+      user.id,
+      'ex',
+      1000 * 60 * 60 * 24 * 3);//3days
     await sendMail(email, `
       <h2>
         <a href='http://localhost:3000/change-password/${uuid}' target='_blank'>Click this link to reset password</a>
@@ -211,10 +215,12 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg("password") password: string,
+    @Arg("rePassword") rePassword: string,
     @Arg("token") token: string,
-    @Ctx() { em, redisClient }: MyContext
+    @Ctx() { em, redisClient, req }: MyContext
   ): Promise<UserResponse> {
     const trimmedPassword = (password || "").trim();
+    const trimmedRePassword = (rePassword || "").trim();
     if (trimmedPassword.length <= 2) {
       return {
         errors: [
@@ -225,8 +231,18 @@ export class UserResolver {
         ]
       }
     }
+    if (trimmedPassword !== trimmedRePassword) {
+      return {
+        errors: [
+          {
+            field: "rePassword",
+            message: "passwords does not match",
+          }
+        ]
+      }
+    }
 
-    const userID = await redisClient.get(token);
+    const userID = await redisClient.get(FORGOT_PASSWORD_PREFIX + token);
 
     if (!userID) {
       return {
@@ -253,14 +269,13 @@ export class UserResolver {
       }
     }
 
-    const hashedPass = await argon2.hash(trimmedPassword);
-
-    user.password = hashedPass;
+    user.password = await argon2.hash(trimmedPassword);
 
     await em.persistAndFlush(user);
 
-    return {
-      user
-    };
+    //login user after change password 
+    req.session.userId = user.id;
+
+    return { user };
   }
 }

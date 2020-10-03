@@ -1,5 +1,5 @@
-query Me{
+    query Me{
       me{
-        ...FragUserWithError
+        ...RegularUserResponse
       }
     }

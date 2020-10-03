@@ -9,7 +9,9 @@ export const Navbar = () => {
     });
     const [, logout] = useLogoutMutation();
     let renderEle;
-    if (!data?.me) {
+    console.log('navbar data: ', data);
+
+    if (!data?.me?.user) {
         //logged out
         renderEle = (
             <>
@@ -24,7 +26,7 @@ export const Navbar = () => {
     } else {
         renderEle = (
             <>
-                <Link mr={2}>{data?.me?.userName}</Link>
+                <Link mr={2}>{data?.me?.user?.firstName} {data?.me?.user?.lastName}</Link>
                 <Link onClick={() => logout()}>Logout</Link>
             </>
         )

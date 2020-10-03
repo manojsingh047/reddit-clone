@@ -1,6 +1,6 @@
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { dedupExchange, fetchExchange } from "urql";
-import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from "../generated/graphql";
+import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, User } from "../generated/graphql";
 import { betterUpdateQuery } from "./utils";
 
 export const createUrqlClient = (ssrExchange: any) => ({
@@ -28,12 +28,14 @@ export const createUrqlClient = (ssrExchange: any) => ({
                         cache,
                         { query: MeDocument },
                         _result,
-                        (result, query) => {
+                        (result, cacheData) => {
+                            console.log('result', result)
+                            console.log('cacheData', cacheData)
                             if (result.login.errors) {
-                                return query;
+                                return cacheData;
                             }
                             return {
-                                me: result.login.user
+                                me: result.login,
                             }
                         }
                     )
@@ -44,11 +46,13 @@ export const createUrqlClient = (ssrExchange: any) => ({
                         { query: MeDocument },
                         _result,
                         (result, query) => {
+                            console.log('result', result)
+                            console.log('query', query)
                             if (result.register.errors) {
                                 return query;
                             }
                             return {
-                                me: result.register.user
+                                me: result.register
                             }
                         }
                     )

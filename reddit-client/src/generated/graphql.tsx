@@ -101,6 +101,7 @@ export type MutationForgotPasswordArgs = {
 
 export type MutationChangePasswordArgs = {
   token: Scalars['String'];
+  rePassword: Scalars['String'];
   password: Scalars['String'];
 };
 
@@ -117,25 +118,31 @@ export type LoginInput = {
   password: Scalars['String'];
 };
 
-export type FragRegularUserFragment = (
+export type RegularErrorFragment = (
+  { __typename?: 'FieldError' }
+  & Pick<FieldError, 'field' | 'message'>
+);
+
+export type RegularUserFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'userName' | 'firstName' | 'lastName'>
 );
 
-export type FragUserWithErrorFragment = (
+export type RegularUserResponseFragment = (
   { __typename?: 'UserResponse' }
   & { errors?: Maybe<Array<(
     { __typename?: 'FieldError' }
-    & Pick<FieldError, 'field' | 'message'>
+    & RegularErrorFragment
   )>>, user?: Maybe<(
     { __typename?: 'User' }
-    & FragRegularUserFragment
+    & RegularUserFragment
   )> }
 );
 
 export type ChangePasswordMutationVariables = Exact<{
   token: Scalars['String'];
   password: Scalars['String'];
+  rePassword: Scalars['String'];
 }>;
 
 
@@ -143,7 +150,7 @@ export type ChangePasswordMutation = (
   { __typename?: 'Mutation' }
   & { changePassword: (
     { __typename?: 'UserResponse' }
-    & FragUserWithErrorFragment
+    & RegularUserResponseFragment
   ) }
 );
 
@@ -166,7 +173,7 @@ export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login: (
     { __typename?: 'UserResponse' }
-    & FragUserWithErrorFragment
+    & RegularUserResponseFragment
   ) }
 );
 
@@ -187,7 +194,7 @@ export type RegisterMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'UserResponse' }
-    & FragUserWithErrorFragment
+    & RegularUserResponseFragment
   ) }
 );
 
@@ -198,36 +205,42 @@ export type MeQuery = (
   { __typename?: 'Query' }
   & { me: (
     { __typename?: 'UserResponse' }
-    & FragUserWithErrorFragment
+    & RegularUserResponseFragment
   ) }
 );
 
-export const FragRegularUserFragmentDoc = gql`
-    fragment FragRegularUser on User {
+export const RegularErrorFragmentDoc = gql`
+    fragment RegularError on FieldError {
+  field
+  message
+}
+    `;
+export const RegularUserFragmentDoc = gql`
+    fragment RegularUser on User {
   id
   userName
   firstName
   lastName
 }
     `;
-export const FragUserWithErrorFragmentDoc = gql`
-    fragment FragUserWithError on UserResponse {
+export const RegularUserResponseFragmentDoc = gql`
+    fragment RegularUserResponse on UserResponse {
   errors {
-    field
-    message
+    ...RegularError
   }
   user {
-    ...FragRegularUser
+    ...RegularUser
   }
 }
-    ${FragRegularUserFragmentDoc}`;
+    ${RegularErrorFragmentDoc}
+${RegularUserFragmentDoc}`;
 export const ChangePasswordDocument = gql`
-    mutation ChangePassword($token: String!, $password: String!) {
-  changePassword(token: $token, password: $password) {
-    ...FragUserWithError
+    mutation ChangePassword($token: String!, $password: String!, $rePassword: String!) {
+  changePassword(token: $token, password: $password, rePassword: $rePassword) {
+    ...RegularUserResponse
   }
 }
-    ${FragUserWithErrorFragmentDoc}`;
+    ${RegularUserResponseFragmentDoc}`;
 
 export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
@@ -244,10 +257,10 @@ export function useForgotPasswordMutation() {
 export const LoginDocument = gql`
     mutation Login($options: LoginInput!) {
   login(options: $options) {
-    ...FragUserWithError
+    ...RegularUserResponse
   }
 }
-    ${FragUserWithErrorFragmentDoc}`;
+    ${RegularUserResponseFragmentDoc}`;
 
 export function useLoginMutation() {
   return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
@@ -264,10 +277,10 @@ export function useLogoutMutation() {
 export const RegisterDocument = gql`
     mutation Register($options: UserRegisterInput!) {
   register(options: $options) {
-    ...FragUserWithError
+    ...RegularUserResponse
   }
 }
-    ${FragUserWithErrorFragmentDoc}`;
+    ${RegularUserResponseFragmentDoc}`;
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
@@ -275,10 +288,10 @@ export function useRegisterMutation() {
 export const MeDocument = gql`
     query Me {
   me {
-    ...FragUserWithError
+    ...RegularUserResponse
   }
 }
-    ${FragUserWithErrorFragmentDoc}`;
+    ${RegularUserResponseFragmentDoc}`;
 
 export function useMeQuery(options: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<MeQuery>({ query: MeDocument, ...options });

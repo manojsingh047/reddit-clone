@@ -1,9 +1,0 @@
-fragment FragUserWithError on UserResponse{
-    errors{
-      field
-      message
-    }
-    user{
-      ...FragRegularUser
-    }
-}
