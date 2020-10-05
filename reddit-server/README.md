@@ -8,10 +8,6 @@ Setup dev env:
   psql (12.4): [manoj1234]
 
 
-//mikriORM migration:
-npx mikro-orm migration:create
-
-
 2. Run redis
 manoj@MANOj:~$ sudo service redis-server status
  * redis-server is running

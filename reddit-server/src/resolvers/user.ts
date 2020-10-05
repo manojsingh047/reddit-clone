@@ -11,13 +11,13 @@ import {
 import { MyContext } from "src/types";
 import argon2 from "argon2";
 import { User } from "./../entities/User";
-import { EntityManager } from "@mikro-orm/postgresql";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "./../constants";
 import { UserRegisterInput } from "./UserRegisterInput";
 import { validateRegister } from "./../utils/validateRegister";
 import { FieldError } from "./FieldError";
 import { sendMail } from "../utils/sendMail";
 import { v4 as uuidv4 } from 'uuid';
+import { getConnection } from "typeorm";
 
 @InputType()
 class LoginInput {
@@ -40,7 +40,7 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Query(() => UserResponse)
-  async me(@Ctx() { em, req }: MyContext): Promise<UserResponse> {
+  async me(@Ctx() { req }: MyContext): Promise<UserResponse> {
     if (!req.session.userId) {
       return {
         errors: [{
@@ -49,7 +49,11 @@ export class UserResolver {
         }]
       };
     }
-    const currentUser = await em.findOne(User, { id: req.session.userId });
+    const currentUser = await User.findOne({
+      where: {
+        id: req.session.userId
+      }
+    });
     if (!currentUser) {
       return {
         errors: [{
@@ -66,37 +70,36 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UserRegisterInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
     if (errors) {
       return { errors };
     }
-
     const hashedPassword = await argon2.hash(options.password);
-
-    // const user = em.create(User, {
-    //   userName: options.loginInput.userName,
-    //   password: hashedPassword,
-    //   firstName: options.firstName,
-    //   lastName: options.lastName,
-    // });
     let user;
     try {
-      // await em.persistAndFlush(user); //thowing unknown error - ValidationError: You cannot call em.flush() from inside lifecycle hook handlers
 
-      const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
-        //need to provide actual column names that are in DB and need to provide all columns, since this is a raw query and we don't have ORM types and validations availe, and similarly we need to map the result that we get to our types bcecause that would be a raw result from DB 
-        user_name: options.userName,
-        email: options.email,
-        password: hashedPassword,
-        first_name: options.firstName,
-        last_name: options.lastName,
-        created_at: new Date(), //need to provide all columns vals since we are doing a insert manually
-        updated_at: new Date(), //need to provide all columns vals since we are doing a insert manually
-      }).returning('*');
-      const mappedToEntitiesResults = result.map((item: User) => em.map(User, item)); //mapped raw result from DB to ORM type 
-      user = mappedToEntitiesResults[0];
+      const result = await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({
+          userName: options.userName,
+          email: options.email,
+          password: hashedPassword,
+          firstName: options.firstName,
+          lastName: options.lastName,
+        })
+        .returning('*')
+        .execute();
+
+      user = result.raw[0];
+
+      console.log('user', user);
+
+      // const mappedToEntitiesResults = result.map((item: User) => em.map(User, item)); //mapped raw result from DB to ORM type 
+      // user = mappedToEntitiesResults[0];
     } catch (error) {
       if (
         error.name === "UniqueConstraintViolationException" ||
@@ -134,10 +137,12 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: LoginInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, {
-      [options.userNameOrEmail.includes("@") ? "email" : "userName"]: options.userNameOrEmail,
+    const user = await User.findOne({
+      where: {
+        [options.userNameOrEmail.includes("@") ? "email" : "userName"]: options.userNameOrEmail,
+      }
     });
     if (!user) {
       return {
@@ -188,12 +193,15 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
-    @Ctx() { em, redisClient }: MyContext
+    @Ctx() { redisClient }: MyContext
   ) {
-    const user = await em.findOne(User, {
-      email: email
+    const user = await User.findOne({
+      where: {
+        email: email
+      }
     })
-
+    console.log('user***', user);
+    
     if (!user) {
       return true;
     }
@@ -217,7 +225,7 @@ export class UserResolver {
     @Arg("password") password: string,
     @Arg("rePassword") rePassword: string,
     @Arg("token") token: string,
-    @Ctx() { em, redisClient, req }: MyContext
+    @Ctx() { redisClient, req }: MyContext
   ): Promise<UserResponse> {
     const trimmedPassword = (password || "").trim();
     const trimmedRePassword = (rePassword || "").trim();
@@ -252,10 +260,8 @@ export class UserResolver {
         }]
       }
     }
-
-    const user = await em.findOne(User, {
-      id: parseInt(userID)
-    })
+    const userIdNum = parseInt(userID);
+    const user = await User.findOne(userIdNum)
 
     console.log(user);
 
@@ -269,9 +275,10 @@ export class UserResolver {
       }
     }
 
-    user.password = await argon2.hash(trimmedPassword);
-
-    await em.persistAndFlush(user);
+    User.update(
+      { id: userIdNum },
+      { password: await argon2.hash(trimmedPassword) }
+    );
 
     //login user after change password 
     req.session.userId = user.id;

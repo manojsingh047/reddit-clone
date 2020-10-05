@@ -1,22 +1,22 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { ObjectType, Field } from "type-graphql";
+import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @ObjectType() //to decorate as a graphql entity
-@Entity() //to decorate as mikroORM entity
-export class Post {
+@Entity() //to decorate as ORM entity
+export class Post extends BaseEntity {
   @Field() //to decorate as gql field
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String)
-  @Property({ type: "date" }) //to decorate as db field
-  createdAt = new Date();
+  @CreateDateColumn()
+  createdAt: Date;
 
   // @Field(() => String) //commneted because i dont want graphql to expose this field
-  @Property({ type: "date", onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Field()
-  @Property({ type: "text" })
+  @Column() //to decorate as db field
   title!: string;
 }

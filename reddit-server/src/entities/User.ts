@@ -1,38 +1,38 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { ObjectType, Field } from "type-graphql";
+import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @ObjectType() //to decorate as a graphql entity
-@Entity() //to decorate as mikroORM entity
-export class User {
+@Entity() //to decorate as ORM entity
+export class User extends BaseEntity {
   @Field() //to decorate as gql field
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String)
-  @Property({ type: "date" }) //to decorate as db field
-  createdAt = new Date();
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Field(() => String)
-  @Property({ type: "date", onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Field(() => String)
-  @Property({ type: "text", unique: true })
+  @Column({ unique: true }) //to decorate as db field
   userName!: string;
 
   @Field(() => String)
-  @Property({ type: "text", unique: true })
+  @Column({ unique: true })
   email!: string;
 
   // @Field(() => String) //commneted because i dont want graphql to expose this field
-  @Property({ type: "text" })
+  @Column()
   password!: string;
 
   @Field(() => String)
-  @Property({ type: "text" })
+  @Column()
   firstName!: string;
 
   @Field(() => String, { nullable: true })
-  @Property({ type: "text", nullable: true })
+  @Column({ nullable: true })
   lastName?: string;
 }

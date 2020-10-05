@@ -1,23 +1,33 @@
-import { MikroORM } from "@mikro-orm/core";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
 import cors from 'cors';
 import express from "express";
 import session from "express-session";
-const Redis = require("ioredis");
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
-import { COOKIE_NAME, SERVER_PORT, IS_PROD } from "./constants";
-import mikroConfig from "./mikro-orm.config";
+import { createConnection } from 'typeorm';
+import { COOKIE_NAME, IS_PROD, SERVER_PORT } from "./constants";
+import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+const Redis = require("ioredis");
 let RedisStore = connectRedis(session);
 let redisClient = new Redis();
 
 const main = async () => {
-  const orm = await MikroORM.init(mikroConfig);
-  await orm.getMigrator().up();
+  const conn = await createConnection({
+    type: "postgres",
+    host: "localhost",
+    port: 5432,
+    username: "postgres",
+    password: "manoj1234",
+    database: "dbreddit2",
+    entities: [Post, User],
+    synchronize: true,
+    logging: !IS_PROD
+  });
 
   const app = express();
   app.listen(SERVER_PORT, () => {
@@ -52,7 +62,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res, }) => ({ em: orm.em, req, res, redisClient }),
+    context: ({ req, res, }) => ({ req, res, redisClient }),
   });
   apolloServer.applyMiddleware({ app, cors: false });
 };
