@@ -19,8 +19,12 @@ export class PostResolver {
   @Mutation(() => Post)
   async createPost(
     @Arg("title", () => String) title: string,
+    @Arg("text", () => String) text: string,
+    @Ctx() { req }: MyContext,
   ): Promise<Post> {
-    const post = Post.create({ title }).save();
+    //if no user logged in no post
+    const userId = parseInt(req.session.id);
+    const post = Post.create({ title, text, creatorId: userId }).save();
     return post;
   }
 
@@ -28,13 +32,14 @@ export class PostResolver {
   async updatePost(
     @Arg("id", () => Number) id: number,
     @Arg("title", () => String) title: string,
+    @Arg("text", () => String) text: string,
   ): Promise<Post | null> {
     const post = await Post.findOne({ where: { id: id } });
     if (!post) {
       return null;
     }
     if (!!title) {
-      Post.update({ id }, { title })
+      Post.update({ id }, { title, text })
     }
     return post;
   }
