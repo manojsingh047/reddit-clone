@@ -4,16 +4,16 @@ export async function sendMail(to: string, text: string) {
     // Generate test SMTP service account from ethereal.email
     // Only needed if you don't have a real mail account for testing
 
-    // let testAccount = await nodemailer.createTestAccount();
-    // console.log(testAccount);
-    let testAccount = {
-        user: 'krcyywzoh5tbom7j@ethereal.email',
-        pass: 'tjH4UmFJSM31yW7ydt',
-        smtp: { host: 'smtp.ethereal.email', port: 587, secure: false },
-        imap: { host: 'imap.ethereal.email', port: 993, secure: true },
-        pop3: { host: 'pop3.ethereal.email', port: 995, secure: true },
-        web: 'https://ethereal.email'
-    }
+    let testAccount = await nodemailer.createTestAccount();
+    console.log(testAccount);
+    // let testAccount = {
+    //     user: 'krcyywzoh5tbom7j@ethereal.email',
+    //     pass: 'tjH4UmFJSM31yW7ydt',
+    //     smtp: { host: 'smtp.ethereal.email', port: 587, secure: false },
+    //     imap: { host: 'imap.ethereal.email', port: 993, secure: true },
+    //     pop3: { host: 'pop3.ethereal.email', port: 995, secure: true },
+    //     web: 'https://ethereal.email'
+    // }
       
     let transporter = nodemailer.createTransport({
         host: "smtp.ethereal.email",

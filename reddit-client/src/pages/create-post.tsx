@@ -6,21 +6,12 @@ import React, { useEffect } from 'react'
 import InputField from '../components/InputField';
 import Layout from '../components/Layout';
 import { useCreatePostMutation, useMeQuery } from '../generated/graphql';
+import useIsAuth from '../hooks/useIsAuth';
 import { createUrqlClient } from '../utils/createUrqlClient';
 
 const CreatePost = () => {
-    const [{ data, fetching }] = useMeQuery();
     const router = useRouter();
-
-    console.log("create me", data);
-
-    useEffect(() => {
-        if (!fetching && !data?.me?.user) {
-            router.replace('/login');
-            console.log('not logged in');
-        }
-    }, [data, fetching, router])
-
+    useIsAuth();
     const [, createPost] = useCreatePostMutation();
 
     return (
