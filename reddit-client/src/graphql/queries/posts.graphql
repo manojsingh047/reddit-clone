@@ -1,0 +1,9 @@
+query PostQuery{
+  posts{
+    id
+    title
+    text
+    points
+    creatorId
+  }
+}

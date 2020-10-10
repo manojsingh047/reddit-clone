@@ -9,10 +9,11 @@ import { createUrqlClient } from '../../utils/createUrqlClient';
 import { toErrorMap } from '../../utils/utils';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
+import NextLink from 'next/link'
 
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
     const [, changePassword] = useChangePasswordMutation();
-    const [tokenError, setTokenError] = useState('');
+    const [tokenError, setTokenError] = useState(false);
     const router = useRouter();
 
     return (
@@ -34,7 +35,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
                         const errorMap = toErrorMap(response.data.changePassword.errors);
                         setErrors(errorMap);
                         if ('token' in errorMap) {
-                            setTokenError(errorMap['token']);
+                            setTokenError(true);
                         }
                         return;
                     }
@@ -58,11 +59,16 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
                                 required
                             />
                         </Box>
-                        <Box mt={2}>
+                        {tokenError && <Box mt={2}>
                             <p style={{
                                 color: 'red'
-                            }}>{tokenError}</p>
-                        </Box>
+                            }}>
+                                Token expired.
+                                <span style={{
+                                    color: "initial"
+                                }}><NextLink href="/forgot-password"> Click here to get a new one</NextLink></span>
+                            </p>
+                        </Box>}
                         <Button mt={4} type="submit" isLoading={isSubmitting} variantColor="teal">
                             Submit
                         </Button>

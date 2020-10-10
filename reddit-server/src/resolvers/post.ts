@@ -1,6 +1,7 @@
-import { Resolver, Query, Ctx, Arg, Int, Mutation } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Int, Mutation, UseMiddleware } from "type-graphql";
 import { MyContext } from "src/types";
 import { Post } from "./../entities/Post";
+import { isAuthMiddleware } from "../middleware/isAuthMiddleware";
 
 @Resolver()
 export class PostResolver {
@@ -16,18 +17,19 @@ export class PostResolver {
     return Post.findOne(id);
   }
 
+  @UseMiddleware(isAuthMiddleware)
   @Mutation(() => Post)
   async createPost(
     @Arg("title", () => String) title: string,
     @Arg("text", () => String) text: string,
     @Ctx() { req }: MyContext,
   ): Promise<Post> {
-    //if no user logged in no post
-    const userId = parseInt(req.session.id);
+    const userId = parseInt(req.session.userId);
     const post = Post.create({ title, text, creatorId: userId }).save();
     return post;
   }
 
+  @UseMiddleware(isAuthMiddleware)
   @Mutation(() => Post, { nullable: true })
   async updatePost(
     @Arg("id", () => Number) id: number,
@@ -44,6 +46,7 @@ export class PostResolver {
     return post;
   }
 
+  @UseMiddleware(isAuthMiddleware)
   @Mutation(() => Boolean)
   async deletePost(
     @Arg("id", () => Number) id: number,

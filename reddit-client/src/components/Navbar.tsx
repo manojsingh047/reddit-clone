@@ -32,7 +32,7 @@ export const Navbar = () => {
         )
     }
     return (
-        <Flex backgroundColor="tomato" p={4}>
+        <Flex position="sticky" top={0} zIndex={1} backgroundColor="tomato" p={4}>
             <Box ml="auto">
                 {renderEle}
             </Box>
