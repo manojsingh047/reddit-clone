@@ -6,7 +6,11 @@ import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from 'next/link'
 import { usePostQueryQuery } from "../generated/graphql";
 const Index = () => {
-  const [{ data }] = usePostQueryQuery();
+  const [{ data }] = usePostQueryQuery({
+    variables: {
+      limit: 10
+    }
+  });
   console.log('posts***', data?.posts);
 
   return (
@@ -15,10 +19,10 @@ const Index = () => {
         <Link>Create Post</Link>
       </NextLink>
       {data?.posts.map(post => (
-        <Stack spacing={8}>
-          <Box key={post.id} p={5} shadow="md" borderWidth="1px">
+        <Stack key={post.id} spacing={8}>
+          <Box p={5} shadow="md" borderWidth="1px">
             <Heading fontSize="xl">{post.title}</Heading>
-            <Text mt={4}>{post.text}</Text>
+            <Text mt={4}>{post.textSnippet}</Text>
           </Box>
         </Stack>
       ))}
