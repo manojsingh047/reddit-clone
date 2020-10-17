@@ -2,12 +2,27 @@ import { Resolver, Query, Ctx, Arg, Int, Mutation, UseMiddleware } from "type-gr
 import { MyContext } from "src/types";
 import { Post } from "./../entities/Post";
 import { isAuthMiddleware } from "../middleware/isAuthMiddleware";
+import { getConnection } from "typeorm";
 
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
-    return Post.find();
+  posts(
+    @Arg("limit") limit: number,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+  ): Promise<Post[]> {
+    const realLimit = Math.min(50, limit);
+    const qb = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder("p")
+      .orderBy('"createdAt"', "DESC")
+      .take(realLimit)
+
+    if (cursor) {
+      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+    }
+
+    return qb.getMany();
   }
 
   @Query(() => Post, { nullable: true })
