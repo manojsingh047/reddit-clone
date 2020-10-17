@@ -26,6 +26,7 @@ const User_1 = require("./entities/User");
 const hello_1 = require("./resolvers/hello");
 const post_1 = require("./resolvers/post");
 const user_1 = require("./resolvers/user");
+const path_1 = __importDefault(require("path"));
 const Redis = require("ioredis");
 let RedisStore = connect_redis_1.default(express_session_1.default);
 let redisClient = new Redis();
@@ -39,7 +40,8 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         database: "dbreddit2",
         entities: [Post_1.Post, User_1.User],
         synchronize: true,
-        logging: !constants_1.IS_PROD
+        logging: !constants_1.IS_PROD,
+        migrations: [path_1.default.join(__dirname, './migrations/*')]
     });
     const app = express_1.default();
     app.listen(constants_1.SERVER_PORT, () => {

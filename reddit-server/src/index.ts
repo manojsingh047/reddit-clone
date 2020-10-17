@@ -12,6 +12,8 @@ import { User } from "./entities/User";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import path from 'path';
+
 const Redis = require("ioredis");
 let RedisStore = connectRedis(session);
 let redisClient = new Redis();
@@ -26,8 +28,11 @@ const main = async () => {
     database: "dbreddit2",
     entities: [Post, User],
     synchronize: true,
-    logging: !IS_PROD
+    logging: !IS_PROD,
+    migrations: [path.join(__dirname, './migrations/*')]
   });
+
+  // await conn.runMigrations();
 
   const app = express();
   app.listen(SERVER_PORT, () => {
