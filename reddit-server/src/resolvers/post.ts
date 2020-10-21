@@ -31,17 +31,41 @@ export class PostResolver {
     const realLimit = Math.min(50, limit);
     const extendedLimit = realLimit + 1;
 
-    const qb = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder("p")
-      .orderBy('"createdAt"', "DESC")
-      .take(extendedLimit)
+    // const qb = getConnection()
+    //   .getRepository(Post)
+    //   .createQueryBuilder("p")
+    //   .orderBy('"createdAt"', "DESC")
+    //   .take(extendedLimit)
 
+    // if (cursor) {
+    //   qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+    // }
+
+    // const posts = await qb.getMany();
+
+    const replacements: any[] = [extendedLimit];
     if (cursor) {
-      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      replacements.push(new Date(parseInt(cursor)));
     }
 
-    const posts = await qb.getMany();
+
+    const posts = await getConnection()
+      .query(`
+    SELECT p.*,
+    json_build_object(
+      'id', u.id,
+      'userName', u."userName",
+      'email', u.email,
+      'createdAt', u."createdAt",
+      'updatedAt', u."updatedAt"
+    ) creator
+    from post p    
+    inner join public.user u on u.id = p."creatorId"
+    ${cursor ? `WHERE p."createdAt" < $2` : ''} 
+    ORDER BY p."createdAt" DESC 
+    LIMIT $1
+    `, replacements);
+
     return {
       posts: posts.slice(0, realLimit),
       hasMore: posts.length === extendedLimit

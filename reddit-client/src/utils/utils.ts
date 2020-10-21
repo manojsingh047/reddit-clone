@@ -16,7 +16,7 @@ export function betterUpdateQuery<Result, Query>(cache: Cache, qi: QueryInput, r
 
   cache.updateQuery(qi, data => {
     const updateResult = fn(result, data as any) as any;
-    console.log('updateResult', updateResult);
+    // console.log('updateResult', updateResult);
     return updateResult
   });
 }

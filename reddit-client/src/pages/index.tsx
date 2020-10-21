@@ -11,7 +11,7 @@ const Index = () => {
     cursor: null as string | null
   })
   const [{ data, fetching }] = usePostQueryQuery({ variables });
-  console.log('posts***', data?.posts);
+  // console.log('posts***', data?.posts);
   if (!fetching && !data) {
     return <div>got no data</div>
   }

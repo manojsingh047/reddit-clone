@@ -6,7 +6,7 @@ import {
   InputType,
   Field,
   ObjectType,
-  Query,
+  Query, FieldResolver, Root
 } from "type-graphql";
 import { MyContext } from "src/types";
 import argon2 from "argon2";
@@ -37,8 +37,23 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+
+  /**
+   * Field resolvers are to add field level logic
+   * Here, whenever email field is requested using a gql query,
+   * if the email in the response object is equal to email of logged in user,
+   * we send the email other wise an empty string.
+   */
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    if (user.id === req.session.userId) {
+      return user.email
+    }
+    return "";
+  }
+
   @Query(() => UserResponse)
   async me(@Ctx() { req }: MyContext): Promise<UserResponse> {
     if (!req.session.userId) {
@@ -201,7 +216,7 @@ export class UserResolver {
       }
     })
     console.log('user***', user);
-    
+
     if (!user) {
       return true;
     }
