@@ -3,6 +3,7 @@ import { MyContext } from "src/types";
 import { Post } from "./../entities/Post";
 import { isAuthMiddleware } from "../middleware/isAuthMiddleware";
 import { getConnection } from "typeorm";
+import { Updoot } from "../entities/Updoot";
 
 @ObjectType()
 class PaginatedPosts {
@@ -22,6 +23,37 @@ export class PostResolver {
     return `${root.text.slice(0, 20)}...`;
   }
 
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuthMiddleware)
+  async vote(
+    @Arg('postId', () => Int) postId: number,
+    @Arg('value', () => Int) value: number,
+    @Ctx() { req }: MyContext
+  ) {
+    const { userId } = req.session;
+    const isUpdoot = value !== -1;
+    const realValue = isUpdoot ? 1 : -1;
+
+    // Updoot.insert({
+    //   userId,
+    //   postId,
+    //   value: realValue
+    // });
+
+    await getConnection().query(`
+    START TRANSACTION;
+
+    insert into updoot ("userId", "postId", "value")
+    values (${userId},${postId},${realValue});
+
+    update post set points = points + ${realValue}
+    where id = ${postId} ;
+
+    COMMIT;
+    `);
+
+    return true;
+  }
 
   @Query(() => PaginatedPosts)
   async posts(

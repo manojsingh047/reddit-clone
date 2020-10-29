@@ -13,6 +13,7 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import path from 'path';
+import { Updoot } from "./entities/Updoot";
 
 const Redis = require("ioredis");
 let RedisStore = connectRedis(session);
@@ -26,7 +27,7 @@ const main = async () => {
     username: "postgres",
     password: "manoj1234",
     database: "dbreddit2",
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
     synchronize: true,
     logging: !IS_PROD,
     migrations: [path.join(__dirname, './migrations/*')]
