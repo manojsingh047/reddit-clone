@@ -145,6 +145,15 @@ export type LoginInput = {
   password: Scalars['String'];
 };
 
+export type PostSnippetFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'title' | 'text' | 'points' | 'creatorId' | 'createdAt' | 'textSnippet'>
+  & { creator: (
+    { __typename?: 'User' }
+    & Pick<User, 'userName' | 'id' | 'email' | 'createdAt'>
+  ) }
+);
+
 export type RegularErrorFragment = (
   { __typename?: 'FieldError' }
   & Pick<FieldError, 'field' | 'message'>
@@ -239,6 +248,17 @@ export type RegisterMutation = (
   ) }
 );
 
+export type VoteMutationVariables = Exact<{
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
+}>;
+
+
+export type VoteMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'vote'>
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -263,15 +283,28 @@ export type PostQueryQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'title' | 'text' | 'points' | 'creatorId' | 'createdAt' | 'textSnippet'>
-      & { creator: (
-        { __typename?: 'User' }
-        & Pick<User, 'userName' | 'id' | 'email' | 'createdAt'>
-      ) }
+      & PostSnippetFragment
     )> }
   ) }
 );
 
+export const PostSnippetFragmentDoc = gql`
+    fragment PostSnippet on Post {
+  id
+  title
+  text
+  points
+  creatorId
+  createdAt
+  textSnippet
+  creator {
+    userName
+    id
+    email
+    createdAt
+  }
+}
+    `;
 export const RegularErrorFragmentDoc = gql`
     fragment RegularError on FieldError {
   field
@@ -363,6 +396,15 @@ export const RegisterDocument = gql`
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
+export const VoteDocument = gql`
+    mutation Vote($value: Int!, $postId: Int!) {
+  vote(value: $value, postId: $postId)
+}
+    `;
+
+export function useVoteMutation() {
+  return Urql.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument);
+};
 export const MeDocument = gql`
     query Me {
   me {
@@ -378,24 +420,12 @@ export const PostQueryDocument = gql`
     query PostQuery($limit: Int!, $cursor: String) {
   posts(limit: $limit, cursor: $cursor) {
     posts {
-      id
-      title
-      text
-      points
-      creatorId
-      createdAt
-      textSnippet
-      creator {
-        userName
-        id
-        email
-        createdAt
-      }
+      ...PostSnippet
     }
     hasMore
   }
 }
-    `;
+    ${PostSnippetFragmentDoc}`;
 
 export function usePostQueryQuery(options: Omit<Urql.UseQueryArgs<PostQueryQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<PostQueryQuery>({ query: PostQueryDocument, ...options });

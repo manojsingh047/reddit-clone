@@ -5,6 +5,7 @@ import Layout from "../components/Layout";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from 'next/link'
 import { usePostQueryQuery } from "../generated/graphql";
+import UpdootSection from "../components/UpdootSection";
 const Index = () => {
   const [variables, setVariables] = useState({
     limit: 15,
@@ -29,15 +30,18 @@ const Index = () => {
       {!data && fetching ? (
         <div>loading...</div>
       ) : (
-          data!.posts.posts.map(post => (
-            <Stack key={post.id} spacing={8}>
-              <Box p={5} shadow="md" borderWidth="1px">
-                <Heading fontSize="xl">{post.title}</Heading>
-                <Text mt={4}>Posted By: {post.creator.userName} at {post.creator.createdAt}</Text>
-                <Text mt={4}>{post.textSnippet}</Text>
-              </Box>
-            </Stack>
-          ))
+          <Stack spacing={8}>
+            {data!.posts.posts.map(post => (
+              <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
+                <UpdootSection post={post} />
+                <Box>
+                  <Heading fontSize="xl">{post.title}</Heading>
+                  <Text mt={4}>Posted By: {post.creator.userName} at {post.creator.createdAt}</Text>
+                  <Text mt={4}>{post.textSnippet}</Text>
+                </Box>
+              </Flex>
+            ))}
+          </Stack>
         )}
 
       {!!data && data.posts.hasMore && <Flex>
