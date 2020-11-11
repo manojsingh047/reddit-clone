@@ -7,7 +7,7 @@ import NextLink from 'next/link'
 import { usePostQueryQuery } from "../generated/graphql";
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 10,
+    limit: 15,
     cursor: null as string | null
   })
   const [{ data, fetching }] = usePostQueryQuery({ variables });
@@ -33,6 +33,7 @@ const Index = () => {
             <Stack key={post.id} spacing={8}>
               <Box p={5} shadow="md" borderWidth="1px">
                 <Heading fontSize="xl">{post.title}</Heading>
+                <Text mt={4}>Posted By: {post.creator.userName} at {post.creator.createdAt}</Text>
                 <Text mt={4}>{post.textSnippet}</Text>
               </Box>
             </Stack>

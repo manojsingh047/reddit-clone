@@ -8,6 +8,12 @@ query PostQuery($limit:Int!, $cursor: String){
       creatorId
       createdAt
       textSnippet
+      creator{
+        userName
+        id
+        email
+        createdAt
+      }
     }
     hasMore
   }
