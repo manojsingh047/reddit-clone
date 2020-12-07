@@ -12,4 +12,5 @@ fragment PostSnippet on Post{
         email
         createdAt
       }
+      voteStatus
 }
